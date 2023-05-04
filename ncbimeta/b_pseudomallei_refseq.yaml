@@ -1,0 +1,51 @@
+# Config file for B. psuedomallei data
+
+# User Configuration Variables
+OUTPUT_DIR : ncbimeta
+EMAIL : sarahnadeau266@gmail.com
+API_KEY : 
+FORCE_PAUSE_SECONDS : 0
+DATABASE : b_psuedomallei.sqlite
+
+# NCBI Tables to Query
+TABLES :
+  - Assembly
+  - BioSample
+
+# Query Terms to Use
+SEARCH_TERMS :
+  - Assembly : "Burkholderia pseudomallei[Organism] \
+                AND latest refseq[filter] \
+                AND all[filter] NOT anomalous[filter]"
+  - BioSample: "Burkholderia pseudomallei[Organism]"
+
+# Columns of the database (ie. metadata fields to retrieve)
+TABLE_COLUMNS :
+
+  - Assembly :
+    - AssemblyAccession : AssemblyAccession
+    - AssemblyBioSampleAccession : BioSampleAccn
+    - AssemblyGenbankBioprojectAccession : GB_BioProjects, BioprojectAccn
+    - AssemblyOrganism : Organism
+    - AssemblyContigCount: Meta, Stat, category, contig_count
+    - AssemblyContigN50 : Meta, Stat, category, contig_n50
+    - AssemblyTotalLength : Meta, Stat, category, total_length
+    - AssemblySubmissionDate : SubmissionDate
+    - AssemblyFTPGenbank : FtpPath_GenBank
+    - AssemblyComment : NullValue
+
+  - BioSample :
+    - BioSampleAccession: BioSample, accession
+    - BioSampleBioProjectAccession: XPATH, //Links/Link[@target='bioproject']/@label
+    - BioSampleSRAAccession: Id, db, SRA
+    - BioSampleOrganism: Description, OrganismName
+    - BioSampleName: Id, db_label, Sample name
+    - BioSampleStrain: Attribute, harmonized_name, strain
+    - BioSampleGeographicLocation: Attribute, harmonized_name, geo_loc_name
+    - BioSampleHost: Attribute, harmonized_name, host
+    - BioSampleIsolationSource: Attribute, harmonized_name, isolation_source
+    - BioSampleSubmissionDate: BioSample, submission_date
+    - BioSampleLat : Attribute, attribute_name, Latitude
+    - BioSampleLatLon : Attribute, harmonized_name, lat_lon
+    - BioSampleLon : Attribute, attribute_name, Longitude
+    - BioSampleComment : NullValue

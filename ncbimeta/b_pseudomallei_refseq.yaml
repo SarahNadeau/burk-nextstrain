@@ -31,7 +31,7 @@ TABLE_COLUMNS :
     - AssemblyContigN50 : Meta, Stat, category, contig_n50
     - AssemblyTotalLength : Meta, Stat, category, total_length
     - AssemblySubmissionDate : SubmissionDate
-    - AssemblyFTPGenbank : FtpPath_GenBank
+    - AssemblyFTPRefSeq : FtpPath_RefSeq
     - AssemblyComment : NullValue
 
   - BioSample :

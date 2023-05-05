@@ -16,7 +16,7 @@ TABLES :
 
 # Query Terms to Use
 SEARCH_TERMS :
-  - Assembly : (SAMN12991206[BioSample])
+  - Assembly : (SAMN12991206[BioSample] OR SAMN10228581[BioSample])
   - BioProject : (PRJNA269675[BioProject IDs and Accessions])
   - BioSample: (SAMN12991206[Accession])
   - SRA : (SAMN12991206[BioSample])

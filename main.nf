@@ -23,7 +23,9 @@ workflow {
 
     EXPORT_DATABASE_TABLE(BUILD_DATABASE.out.db_file)
 
-    DOWNLOAD_ASSEMBLIES(EXPORT_DATABASE_TABLE.out.assembly_table)
+    DOWNLOAD_ASSEMBLIES(
+        EXPORT_DATABASE_TABLE.out.assembly_table,
+        params.api_key)
 
     // TODO: build alignment
 

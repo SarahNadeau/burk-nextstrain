@@ -40,19 +40,25 @@ process EXPORT_DATABASE_TABLE {
 }
 
 process DOWNLOAD_ASSEMBLIES {
-    publishDir "data/assemblies"
+    publishDir "data/"
+    container "staphb/ncbi-datasets:14.7.0"
 
     input:
         path assembly_table
+        val api_key
 
     output:
-        path "*.fna.gz"
+        path "ncbi_dataset/"
 
     shell:
     """
-    download_assemblies.py --assembly_table !{assembly_table} --output_dir '.'
+    # AssemblyAccession is 3rd colum of table, ignore header line
+    awk 'NR < 2 {next}; {print \$3 }' !{assembly_table} > assembly_accessions.txt
 
-    # Extract and rename fasta files
-    LEFT OFF HERE!
+    # Download assemblies
+    datasets download genome accession \
+        --inputfile assembly_accessions.txt \
+        --api-key !{api_key}
+    unzip ncbi_dataset.zip
     """
 }

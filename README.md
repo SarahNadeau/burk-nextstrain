@@ -3,7 +3,6 @@
 This project is to keep a Nextstrain build for B. pseudomallei automatically updated whenever new data is made available in NCBI's RefSeq database.
 
 The workflow expects that you have an API key for querying NCBI. To get a key, follow the instructions [here](https://support.nlm.nih.gov/knowledgebase/article/KA-05317/en-us).
-
 It also requires you to specify an email address to be associated with your queries to NCBI.
 
 To run a small example:
@@ -27,3 +26,7 @@ nextflow run \
     --output_folder burk_results \
     main.nf
 ```
+
+## Developer notes
+
+To utilize the Github actions workflows defined in `.github/workflows`, you need to add two secrets to your repository, `NCBI_API_KEY` and `NCBI_EMAIL`.

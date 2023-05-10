@@ -1,0 +1,38 @@
+name: Test main workflow
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test-workflow:
+    runs-on: ubuntu-latest
+    env:
+      ncbi_api_key: ${{ secrets.NCBI_API_KEY }}
+      ncbi_email: ${{ secrets.NCBI_EMAIL }}
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+
+      - name: Set up nextflow
+        uses: nf-core/setup-nextflow@v1.2.0
+
+      - name: Set up python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11.3
+
+      - name: Install python dependencies
+        run: |
+          /usr/bin/python3 -m pip install --upgrade pip
+          /usr/bin/python3 -m pip install -r requirements.txt
+
+      - name: Run main workflow 
+        run: |
+          nextflow run \
+            -profile docker \
+            --api_key ${{ env.ncbi_api_key }} \
+            --ncbi_email ${{ env.ncbi_email }} \
+            main.nf

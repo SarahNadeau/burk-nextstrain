@@ -40,7 +40,7 @@ process EXPORT_DATABASE_TABLE {
 }
 
 process DOWNLOAD_ASSEMBLIES {
-    publishDir "data/"
+    publishDir (path: "data/", mode: 'copy')
     container "staphb/ncbi-datasets:14.7.0"
 
     input:
@@ -48,7 +48,7 @@ process DOWNLOAD_ASSEMBLIES {
         val api_key
 
     output:
-        path "ncbi_dataset/"
+        path "assemblies", emit: assembly_dir
 
     shell:
     """
@@ -60,5 +60,19 @@ process DOWNLOAD_ASSEMBLIES {
         --inputfile assembly_accessions.txt \
         --api-key !{api_key}
     unzip ncbi_dataset.zip
+
+    # Remove directory structure
+    mkdir assemblies/
+    for DIR in ncbi_dataset/data/*/; do
+        mv \$DIR/*.fna assemblies/
+        rm -r \$DIR
+    done
+
+    # Rename to assembly accession by removing everything after second-to-last underscore
+    # Assumes filenames like GCA_002587985.1_ASM258798v1_genomic.fna > GCA_002587985.1
+    cd assemblies/
+    for FILE in *.fna; do
+        mv -i "\$FILE" "\${FILE%_*_*}"
+    done
     """
 }

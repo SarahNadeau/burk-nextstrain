@@ -9,30 +9,20 @@ DATABASE : b_psuedomallei.sqlite
 
 # NCBI Tables to Query
 TABLES :
-  - Assembly
   - BioSample
+  - Assembly
 
 # Query Terms to Use
 SEARCH_TERMS :
-  - Assembly : "Burkholderia pseudomallei[Organism] \
-                AND latest refseq[filter] \
-                AND all[filter] NOT anomalous[filter]"
-  - BioSample: "Burkholderia pseudomallei[Organism]"
+  # Get BioSamples where an assembly is available
+  - BioSample: "\"Burkholderia pseudomallei\"[Organism] \
+                AND \"biosample assembly\"[filter]"
+  # Get all assemblies from RefSeq
+  - Assembly : "\"Burkholderia pseudomallei\"[Organism] \
+                AND \"latest refseq\"[filter]"
 
 # Columns of the database (ie. metadata fields to retrieve)
 TABLE_COLUMNS :
-
-  - Assembly :
-    - AssemblyAccession : AssemblyAccession
-    - AssemblyBioSampleAccession : BioSampleAccn
-    - AssemblyGenbankBioprojectAccession : GB_BioProjects, BioprojectAccn
-    - AssemblyOrganism : Organism
-    - AssemblyContigCount: Meta, Stat, category, contig_count
-    - AssemblyContigN50 : Meta, Stat, category, contig_n50
-    - AssemblyTotalLength : Meta, Stat, category, total_length
-    - AssemblySubmissionDate : SubmissionDate
-    - AssemblyFTPRefSeq : FtpPath_RefSeq
-    - AssemblyComment : NullValue
 
   - BioSample :
     - BioSampleAccession: BioSample, accession
@@ -41,11 +31,20 @@ TABLE_COLUMNS :
     - BioSampleOrganism: Description, OrganismName
     - BioSampleName: Id, db_label, Sample name
     - BioSampleStrain: Attribute, harmonized_name, strain
+    - BioSampleCollectionDate: Attribute, harmonized_name, collection_date
     - BioSampleGeographicLocation: Attribute, harmonized_name, geo_loc_name
     - BioSampleHost: Attribute, harmonized_name, host
     - BioSampleIsolationSource: Attribute, harmonized_name, isolation_source
     - BioSampleSubmissionDate: BioSample, submission_date
-    - BioSampleLat : Attribute, attribute_name, Latitude
-    - BioSampleLatLon : Attribute, harmonized_name, lat_lon
-    - BioSampleLon : Attribute, attribute_name, Longitude
     - BioSampleComment : NullValue
+
+  - Assembly :
+    - AssemblyAccession : AssemblyAccession
+    - AssemblyBioSampleID : BioSampleId
+    - AssemblyOrganism : Organism
+    - AssemblyContigCount: Meta, Stat, category, contig_count
+    - AssemblyContigN50 : Meta, Stat, category, contig_n50
+    - AssemblyTotalLength : Meta, Stat, category, total_length
+    - AssemblySubmissionDate : SubmissionDate
+    - AssemblyFTPRefSeq : FtpPath_RefSeq
+    - AssemblyComment : NullValue

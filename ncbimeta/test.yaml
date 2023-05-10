@@ -2,80 +2,45 @@
 OUTPUT_DIR : ncbimeta
 EMAIL : 
 API_KEY :
-FORCE_PAUSE_SECONDS : 1
+FORCE_PAUSE_SECONDS : 0.5
 DATABASE : test.sqlite
 
 # NCBI Tables to Query
 TABLES :
-  - Assembly
   - BioSample
-  - BioProject
-  - SRA
-  - Nucleotide
-  - Pubmed
+  - Assembly
 
 # Query Terms to Use
 SEARCH_TERMS :
-  - Assembly : (SAMN12991206[BioSample] OR SAMN10228581[BioSample])
-  - BioProject : (PRJNA269675[BioProject IDs and Accessions])
-  - BioSample: (SAMN12991206[Accession])
-  - SRA : (SAMN12991206[BioSample])
-  - Nucleotide : (SAMN12991206[BioSample])
-  - Pubmed : (26634751[uid])
+  # Get the only BioSample associated with a PhiX assembly
+  - BioSample : "SAMN03379850"
+  # Get that and some other assemblies
+  - Assembly : "GCA_002587985.1 OR 	GCA_002585215.1 OR GCA_002585255.1"
 
 # Columns of the database (ie. metadata fields to retrieve)
 TABLE_COLUMNS :
 
+  - BioSample :
+    - BioSampleAccession: BioSample, accession
+    - BioSampleBioProjectAccession: XPATH, //Links/Link[@target='bioproject']/@label
+    - BioSampleSRAAccession: Id, db, SRA
+    - BioSampleOrganism: Description, OrganismName
+    - BioSampleName: Id, db_label, Sample name
+    - BioSampleStrain: Attribute, harmonized_name, strain
+    - BioSampleCollectionDate: Attribute, harmonized_name, collection_date
+    - BioSampleGeographicLocation: Attribute, harmonized_name, geo_loc_name
+    - BioSampleHost: Attribute, harmonized_name, host
+    - BioSampleIsolationSource: Attribute, harmonized_name, isolation_source
+    - BioSampleSubmissionDate: BioSample, submission_date
+    - BioSampleComment : NullValue
+
   - Assembly :
     - AssemblyAccession : AssemblyAccession
-    - AssemblyBioSampleAccession : BioSampleAccn
-    - AssemblyGenbankBioprojectAccession : GB_BioProjects, BioprojectAccn
+    - AssemblyBioSampleID : BioSampleId
     - AssemblyOrganism : Organism
     - AssemblyContigCount: Meta, Stat, category, contig_count
+    - AssemblyContigN50 : Meta, Stat, category, contig_n50
     - AssemblyTotalLength : Meta, Stat, category, total_length
     - AssemblySubmissionDate : SubmissionDate
     - AssemblyFTPRefSeq : FtpPath_RefSeq
     - AssemblyComment : NullValue
-
-  - BioSample :
-    - BioSampleAccession: BioSample, accession
-    - BioSampleAccessionSecondary: NullValue
-    - BioSampleBioProjectAccession: XPATH, //Links/Link[@target='bioproject']/@label
-    - BioSampleSRAAccession: Id, db, SRA
-    - BioSampleOrganism: Description, OrganismName
-    - BioSampleStrain: Attribute, harmonized_name, strain
-    - BioSampleSubmissionDate: BioSample, submission_date
-    - BioSampleComment : NullValue
-
-  - BioProject :
-    - BioProjectAccession : ArchiveID, accession
-    - BioProjectTitle : XPATH, //ProjectDescr/Title/text()
-    - BioProjectOrganismLabel : ProjectTypeSubmission, Label
-    - BioProjectRegistrationDate : Submission, submitted
-    - BioProjectComment : NullValue
-
-  - Nucleotide :
-    - NucleotideAccession : GBSeq_primary-accession
-    - NucleotideBioProjectAccession : GBSeq_project
-    - NucleotideOrganism : GBSeq_organism
-    - NucleotideLength : GBSeq_length
-    - NucleotideComment : NullValue
-
-  - SRA :
-    - SRABioProjectAccession : STUDY, EXTERNAL_ID, namespace, BioProject
-    - SRABioSampleAccession : RUN_SET, RUN, Pool, EXTERNAL_ID, namespace, BioSample
-    - SRASampleAccession : SAMPLE_DESCRIPTOR, accession
-    - SRASampleName : SAMPLE, alias
-    - SRAExperimentAccession : EXPERIMENT, accession
-    - SRAExperimentName : EXPERIMENT, alias
-    - SRARunAccession : RUN, accession
-    - SRAComment : NullValue
-
-  - Pubmed :
-    - PubmedPublishYear : PubDate, Year
-    - PubmedPubishMonth : PubDate, Month
-    - PubmedPublishDay : PubDate, Day
-    - PubmedEPublishDate : EPubDate
-    - PubmedPublishModel : Article, PubModel
-    - PubmedType : PublicationType
-    - PubmedComment : NullValue

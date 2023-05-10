@@ -1,0 +1,20 @@
+name: Test main workflow
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test-workflow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+
+      - name: Set up nextflow
+        uses: nf-core/setup-nextflow@v1.2.0
+
+      - name: Run main workflow 
+        run: nextflow main.nf

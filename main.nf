@@ -9,12 +9,15 @@ params.output_folder = 'test_results'
 params.traits = 'region host'
 params.augur_refine_params = '--root reference.fasta.ref'
 params.max_assemblies = 'Inf' // maximum number of assemblies to download, regardless of how many match NCBI query
+params.cached_assembly_dir = false // directory with assemblies you want to include
 
 // Import modules
 include { 
     BUILD_DATABASE;
     EXPORT_DATABASE_TABLE;
-    DOWNLOAD_ASSEMBLIES } from './modules/get_data.nf'
+    CHECK_FOR_NEW_ASSEMBLIES;
+    DOWNLOAD_ASSEMBLIES;
+    DOWNLOAD_ASSEMBLIES_TO_CACHE } from './modules/get_data.nf'
 include {
     ALIGN_ASSEMBLIES_PARSNP } from './modules/align.nf'
 include {
@@ -34,14 +37,34 @@ workflow {
 
     EXPORT_DATABASE_TABLE(BUILD_DATABASE.out.db_file)
 
-    DOWNLOAD_ASSEMBLIES(
-        EXPORT_DATABASE_TABLE.out.assembly_table,
-        params.api_key,
-        params.max_assemblies)
+    if (params.cached_assembly_dir) {
+        cached_assembly_dir = channel.fromPath(params.cached_assembly_dir)
 
-    ALIGN_ASSEMBLIES_PARSNP(
-        DOWNLOAD_ASSEMBLIES.out.assembly_dir,
-        reference)
+        CHECK_FOR_NEW_ASSEMBLIES(
+            EXPORT_DATABASE_TABLE.out.assembly_table,
+            cached_assembly_dir)
+
+        DOWNLOAD_ASSEMBLIES_TO_CACHE(
+            CHECK_FOR_NEW_ASSEMBLIES.out.new_assembly_table,
+            params.api_key,
+            params.max_assemblies)
+
+        ALIGN_ASSEMBLIES_PARSNP(
+            DOWNLOAD_ASSEMBLIES_TO_CACHE.out.ready_signal,
+            cached_assembly_dir,
+            reference)
+            
+    } else {
+        DOWNLOAD_ASSEMBLIES(
+            EXPORT_DATABASE_TABLE.out.assembly_table,
+            params.api_key,
+            params.max_assemblies)
+        
+        ALIGN_ASSEMBLIES_PARSNP(
+            DOWNLOAD_ASSEMBLIES.out.ready_signal,
+            DOWNLOAD_ASSEMBLIES.out.assembly_dir,
+            reference)
+    }
 
     EXPORT_NEXTSTRAIN_METADATA(BUILD_DATABASE.out.db_file)
 

@@ -14,17 +14,21 @@ nextflow run \
     main.nf
 ```
 
-To run for B. pseudomallei, first download a reference genome as put it in `assets`.
+To run a small example for B. pseudomallei, first download a reference genome as put it in `assets`.
 Here I use [GCF_000756125.1](https://www.ncbi.nlm.nih.gov/assembly/GCF_000756125.1) as the reference.
+This run uses a cached version of the NCBImeta database and only runs the full pipeline on 5 more assemblies than are cached.
 ```
-nextflow run \
+nextflow run main.nf \
     -profile docker \
+    -stub-run \
     --api_key $NCBI_API_KEY \
     --ncbi_email $NCBI_EMAIL \
     --ncbimeta_config ncbimeta/b_pseudomallei_refseq.yaml \
     --reference assets/GCF_000756125.1_ASM75612v1_genomic.fna \
     --output_folder burk_results \
-    main.nf
+    --max_assemblies 5 \
+    --cached_assembly_dir assets/burk_data/assemblies
+    
 ```
 
 ## Developer notes

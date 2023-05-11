@@ -5,6 +5,7 @@ process ALIGN_ASSEMBLIES_PARSNP {
     label "process_medium"
 
     input:
+        val ready_signal
         path assembly_dir
         path reference
 

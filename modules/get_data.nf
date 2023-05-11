@@ -19,6 +19,12 @@ process BUILD_DATABASE {
         --api !{api_key} \
         --email !{ncbi_email}
     """
+
+    stub:
+    """
+    mkdir ncbimeta
+    cp ${projectDir}/assets/burk_data/* ncbimeta/
+    """
 }
 
 process EXPORT_DATABASE_TABLE {
@@ -46,6 +52,7 @@ process DOWNLOAD_ASSEMBLIES {
     input:
         path assembly_table
         val api_key
+        val max_assemblies
 
     output:
         path "assemblies", emit: assembly_dir
@@ -54,6 +61,12 @@ process DOWNLOAD_ASSEMBLIES {
     """
     # AssemblyAccession is 3rd colum of table, ignore header line
     awk 'NR < 2 {next}; {print \$3 }' !{assembly_table} > assembly_accessions.txt
+
+    # Limit number of assemblies if desired
+    if [[ !{max_assemblies} != 'Inf' ]]; do
+        head -n !{max_assemblies} assembly_accessions_tmp.txt
+        mv assembly_accessions_tmp.txt assembly_accessions.txt
+    done
 
     # Download assemblies
     datasets download genome accession \

@@ -8,6 +8,7 @@ params.reference = 'assets/test_data/reference.fasta'
 params.output_folder = 'test_results'
 params.traits = 'region host'
 params.augur_refine_params = '--root reference.fasta.ref'
+params.max_assemblies = 'Inf' // maximum number of assemblies to download, regardless of how many match NCBI query
 
 // Import modules
 include { 
@@ -35,7 +36,8 @@ workflow {
 
     DOWNLOAD_ASSEMBLIES(
         EXPORT_DATABASE_TABLE.out.assembly_table,
-        params.api_key)
+        params.api_key,
+        params.max_assemblies)
 
     ALIGN_ASSEMBLIES_PARSNP(
         DOWNLOAD_ASSEMBLIES.out.assembly_dir,

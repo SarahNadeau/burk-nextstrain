@@ -17,7 +17,7 @@ nextflow run \
 
 To run a small example for B. pseudomallei, first download a reference genome as put it in `assets`.
 Here I use [GCF_000756125.1](https://www.ncbi.nlm.nih.gov/assembly/GCF_000756125.1) as the reference.
-This run uses a cached version of the NCBImeta database and only runs the full pipeline on 5 more assemblies than are cached.
+This run uses a cached version of the NCBImeta database and only runs the full pipeline on 5 assemblies.
 ```
 nextflow run main.nf \
     -profile docker \

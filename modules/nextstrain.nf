@@ -81,8 +81,9 @@ process PRIORITIES {
         """
 }
 
-// run the whole nextstrain workflow, including export to auspice for visualization
-process NEXTSTRAIN_AUGUR_VCF {
+// run the nextstrain workflow, including inferring ancestral traits and export to auspice for visualization
+// don't refine the tree with any special options
+process NEXTSTRAIN_AUGUR_TRAITS {
     container 'snads/augur:21.1.0'
     publishDir(path: "${params.output_dir}/nextstrain", mode: 'copy')
 
@@ -90,15 +91,12 @@ process NEXTSTRAIN_AUGUR_VCF {
 
     input: 
         path metadata
-        path alignment
-	    path reference
+        path tree
+        path snp_alignment
         val traits
-        val refine_params
 
     output:
         path "auspice.json", emit: auspice_json
-        path "tree_raw.nwk"
-        path "tree.nwk"
         path "traits.json"
         path "branch_lengths.json"
 
@@ -106,31 +104,20 @@ process NEXTSTRAIN_AUGUR_VCF {
         """
         set -eu
 
-        augur tree \
-            --alignment !{alignment} \
-	        --vcf-reference !{reference} \
-            --output tree_raw.nwk
-
         augur refine \
-            --tree tree_raw.nwk \
-            --alignment !{alignment} \
-	        --vcf-reference !{reference} \
-            --metadata !{metadata} \
-            --output-tree tree.nwk \
-            --output-node-data branch_lengths.json \
-            !{refine_params}
+            --tree !{tree} \
+            --output-tree tree_augur.nwk \
+            --output-node-data branch_lengths.json
 
         augur traits \
-            --tree tree.nwk \
+            --tree tree_augur.nwk \
             --metadata !{metadata} \
             --output-node-data traits.json \
             --confidence \
             --columns !{traits}
 
-        # skipping reconstruction of nucleotide and amino acid mutations
-
         augur export v2 \
-            --tree tree.nwk \
+            --tree tree_augur.nwk \
             --metadata !{metadata} \
             --node-data branch_lengths.json \
                         traits.json \

@@ -8,7 +8,6 @@ params.reference = 'assets/test_data/reference.fasta'
 params.data_dir = 'data'  // where to download assemblies to, can also include cached assemblies you want to include in analysis
 params.output_dir = "output_${workflow.start}" // where to output intermediate output, auspic JSON to
 params.traits = 'region host' // metadata column names to reconstruct ancestral traits for
-params.augur_refine_params = '--root reference.fasta.ref' // see augur refine options: https://docs.nextstrain.org/projects/augur/en/stable/usage/cli/refine.html
 params.max_assemblies = 'Inf' // maximum number of assemblies to download, regardless of how many match NCBI query
 
 // Import modules
@@ -21,7 +20,7 @@ include {
     ALIGN_ASSEMBLIES_PARSNP } from './modules/align.nf'
 include {
     EXPORT_NEXTSTRAIN_METADATA;
-    NEXTSTRAIN_AUGUR_VCF } from './modules/nextstrain.nf'
+    NEXTSTRAIN_AUGUR_TRAITS } from './modules/nextstrain.nf'
 
 // Run workflow
 workflow {
@@ -54,10 +53,10 @@ workflow {
 
     EXPORT_NEXTSTRAIN_METADATA(BUILD_DATABASE.out.db_file)
 
-    NEXTSTRAIN_AUGUR_VCF(
+    NEXTSTRAIN_AUGUR_TRAITS(
         EXPORT_NEXTSTRAIN_METADATA.out.metadata,
-        ALIGN_ASSEMBLIES_PARSNP.out.vcf,
-	    reference,
-        params.traits,
-        params.augur_refine_params)
+        ALIGN_ASSEMBLIES_PARSNP.out.tree,
+        ALIGN_ASSEMBLIES_PARSNP.out.snp_alignment,
+        params.traits)       
+
 }

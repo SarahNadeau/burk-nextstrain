@@ -1,5 +1,5 @@
 process BUILD_DATABASE {
-    publishDir "data/$workflow.start"
+    publishDir "${params.output_dir}"
     container "snads/ncbimeta:0.8.3"
  
     input:
@@ -28,7 +28,7 @@ process BUILD_DATABASE {
 }
 
 process EXPORT_DATABASE_TABLE {
-    publishDir "data/$workflow.start"
+    publishDir "${params.output_dir}"
     container "snads/ncbimeta:0.8.3"
 
     input:
@@ -46,77 +46,39 @@ process EXPORT_DATABASE_TABLE {
 }
 
 process CHECK_FOR_NEW_ASSEMBLIES {
-    publishDir (path: "data/", mode: 'copy')
+    publishDir (path: "${params.output_dir}", mode: 'copy')
 
     input:
         path assembly_table
-        path assembly_dir
+        path data_dir
+        val max_assemblies
 
     output:
-        path "new_assembly_table.txt", emit: new_assembly_table
+        path "assemblies_to_download.txt", emit: assemblies_to_download
 
     shell:
     """
-    check_for_new_assemblies.py \
-        --assembly_table !{assembly_table} \
-        --assembly_dir !{assembly_dir}
+    if [[ '!{max_assemblies}' == 'Inf' ]]; then
+        check_for_new_assemblies.py \
+            --assembly_table !{assembly_table} \
+            --assembly_dir !{data_dir}
+    else
+        check_for_new_assemblies.py \
+            --assembly_table !{assembly_table} \
+            --max_assemblies !{max_assemblies} \
+            --assembly_dir !{data_dir}
+    fi
     """
 }
 
 process DOWNLOAD_ASSEMBLIES {
-    publishDir (path: "data/", mode: 'copy')
+    publishDir (path: "${params.data_dir}", mode: 'copy')
     container "staphb/ncbi-datasets:14.7.0"
 
     input:
-        path assembly_table
+        path assembly_list
         val api_key
-        val max_assemblies
-
-    output:
-        path "assemblies", emit: assembly_dir
-        val 'ready', emit: ready_signal
-
-    shell:
-    """
-    # AssemblyAccession is 3rd colum of table, ignore header line
-    awk 'NR < 2 {next}; {print \$3 }' !{assembly_table} > assembly_accessions.txt
-
-    # Limit number of assemblies if desired
-    if [[ !{max_assemblies} != 'Inf' ]]; then
-        head -n !{max_assemblies} assembly_accessions.txt > assembly_accessions_tmp.txt
-        mv assembly_accessions_tmp.txt assembly_accessions.txt
-    fi
-
-    # Download assemblies
-    datasets download genome accession \
-        --inputfile assembly_accessions.txt \
-        --api-key !{api_key}
-    unzip ncbi_dataset.zip
-
-    # Remove directory structure
-    mkdir assemblies/
-    for DIR in ncbi_dataset/data/*/; do
-        mv \$DIR/*.fna assemblies/
-        rm -r \$DIR
-    done
-
-    # Rename to assembly accession by removing everything after second-to-last underscore
-    # Assumes filenames like GCA_002587985.1_ASM258798v1_genomic.fna > GCA_002587985.1
-    cd assemblies/
-    for FILE in *.fna; do
-        mv -i "\$FILE" "\${FILE%_*_*}"
-    done
-    """
-}
-
-process DOWNLOAD_ASSEMBLIES_TO_CACHE {
-    publishDir (path: "${params.cached_assembly_dir}", mode: 'copy')
-    container "staphb/ncbi-datasets:14.7.0"
-
-    input:
-        path assembly_table
-        val api_key
-        val max_assemblies
+        path data_dir
 
     output:
         path "GC*", optional: true
@@ -124,20 +86,11 @@ process DOWNLOAD_ASSEMBLIES_TO_CACHE {
 
     shell:
     """
-    # AssemblyAccession is 3rd colum of table, ignore header line
-    awk 'NR < 2 {next}; {print \$3 }' !{assembly_table} > assembly_accessions.txt
-
-    # Limit number of assemblies if desired
-    if [[ !{max_assemblies} != 'Inf' ]]; then
-        head -n !{max_assemblies} assembly_accessions.txt > assembly_accessions_tmp.txt
-        mv assembly_accessions_tmp.txt assembly_accessions.txt
-    fi
-
-    # If no assemblies in file, don't download anything and warn user
-    if [[ -s assembly_accessions.txt ]]; then
+    # If the file contains new assemblies to download, download them
+    if [[ -s !{assembly_list} ]]; then
         # Download assemblies
         datasets download genome accession \
-            --inputfile assembly_accessions.txt \
+            --inputfile !{assembly_list} \
             --api-key !{api_key}
         unzip ncbi_dataset.zip
 
@@ -151,6 +104,7 @@ process DOWNLOAD_ASSEMBLIES_TO_CACHE {
             done
             rm -r \$DIR
         done
+    # If no assemblies in file, don't download anything and warn user
     else 
         echo "No new assemblies found to download"
     fi

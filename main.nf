@@ -5,19 +5,18 @@ params.api_key = ''
 params.ncbi_email = ''
 params.ncbimeta_config = 'ncbimeta/test.yaml'
 params.reference = 'assets/test_data/reference.fasta'
-params.output_folder = 'test_results'
-params.traits = 'region host'
-params.augur_refine_params = '--root reference.fasta.ref'
+params.data_dir = 'data'  // where to download assemblies to, can also include cached assemblies you want to include in analysis
+params.output_dir = "output_${workflow.start}" // where to output intermediate output, auspic JSON to
+params.traits = 'region host' // metadata column names to reconstruct ancestral traits for
+params.augur_refine_params = '--root reference.fasta.ref' // see augur refine options: https://docs.nextstrain.org/projects/augur/en/stable/usage/cli/refine.html
 params.max_assemblies = 'Inf' // maximum number of assemblies to download, regardless of how many match NCBI query
-params.cached_assembly_dir = false // directory with assemblies you want to include
 
 // Import modules
 include { 
     BUILD_DATABASE;
     EXPORT_DATABASE_TABLE;
     CHECK_FOR_NEW_ASSEMBLIES;
-    DOWNLOAD_ASSEMBLIES;
-    DOWNLOAD_ASSEMBLIES_TO_CACHE } from './modules/get_data.nf'
+    DOWNLOAD_ASSEMBLIES } from './modules/get_data.nf'
 include {
     ALIGN_ASSEMBLIES_PARSNP } from './modules/align.nf'
 include {
@@ -29,6 +28,7 @@ workflow {
 
     ncbimeta_config = channel.fromPath(params.ncbimeta_config)
     reference = channel.fromPath(params.reference)
+    data_dir = channel.fromPath(params.data_dir)
 
     BUILD_DATABASE(
         ncbimeta_config,
@@ -37,34 +37,20 @@ workflow {
 
     EXPORT_DATABASE_TABLE(BUILD_DATABASE.out.db_file)
 
-    if (params.cached_assembly_dir) {
-        cached_assembly_dir = channel.fromPath(params.cached_assembly_dir)
+    CHECK_FOR_NEW_ASSEMBLIES(
+        EXPORT_DATABASE_TABLE.out.assembly_table,
+        data_dir,
+        params.max_assemblies)
 
-        CHECK_FOR_NEW_ASSEMBLIES(
-            EXPORT_DATABASE_TABLE.out.assembly_table,
-            cached_assembly_dir)
+    DOWNLOAD_ASSEMBLIES(
+        CHECK_FOR_NEW_ASSEMBLIES.out.assemblies_to_download,
+        params.api_key,
+        data_dir)
 
-        DOWNLOAD_ASSEMBLIES_TO_CACHE(
-            CHECK_FOR_NEW_ASSEMBLIES.out.new_assembly_table,
-            params.api_key,
-            params.max_assemblies)
-
-        ALIGN_ASSEMBLIES_PARSNP(
-            DOWNLOAD_ASSEMBLIES_TO_CACHE.out.ready_signal,
-            cached_assembly_dir,
-            reference)
-            
-    } else {
-        DOWNLOAD_ASSEMBLIES(
-            EXPORT_DATABASE_TABLE.out.assembly_table,
-            params.api_key,
-            params.max_assemblies)
-        
-        ALIGN_ASSEMBLIES_PARSNP(
-            DOWNLOAD_ASSEMBLIES.out.ready_signal,
-            DOWNLOAD_ASSEMBLIES.out.assembly_dir,
-            reference)
-    }
+    ALIGN_ASSEMBLIES_PARSNP(
+        DOWNLOAD_ASSEMBLIES.out.ready_signal,
+        data_dir,
+        reference)
 
     EXPORT_NEXTSTRAIN_METADATA(BUILD_DATABASE.out.db_file)
 

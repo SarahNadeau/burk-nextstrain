@@ -11,6 +11,7 @@ nextflow run \
     -profile docker \
     --api_key $NCBI_API_KEY \
     --ncbi_email $NCBI_EMAIL \
+    --cached_assembly_dir assets/test_data/assemblies \
     main.nf
 ```
 
@@ -25,10 +26,9 @@ nextflow run main.nf \
     --ncbi_email $NCBI_EMAIL \
     --ncbimeta_config ncbimeta/b_pseudomallei_refseq.yaml \
     --reference assets/GCF_000756125.1_ASM75612v1_genomic.fna \
-    --output_folder burk_results \
-    --max_assemblies 5 \
-    --cached_assembly_dir assets/burk_data/assemblies
-    
+    --output_dir burk_results \
+    --data_dir assets/burk_data/assemblies \
+    --max_assemblies 5
 ```
 
 ## Developer notes

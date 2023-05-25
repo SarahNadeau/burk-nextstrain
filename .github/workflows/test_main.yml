@@ -29,10 +29,20 @@ jobs:
           /usr/bin/python3 -m pip install --upgrade pip
           /usr/bin/python3 -m pip install -r requirements.txt
 
-      - name: Run main workflow 
+      - name: Run main workflow on test data
         run: |
           nextflow run \
             -profile docker \
             --api_key ${{ env.ncbi_api_key }} \
             --ncbi_email ${{ env.ncbi_email }} \
+            --max_assemblies 3 \
+            main.nf
+      
+      - name: Run main workflow on test data used cached sequences
+        run: |
+          nextflow run \
+            -profile docker \
+            --api_key ${{ env.ncbi_api_key }} \
+            --ncbi_email ${{ env.ncbi_email }} \
+            --data_dir data 
             main.nf

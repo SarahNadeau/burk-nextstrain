@@ -15,7 +15,7 @@ SEARCH_TERMS :
   # Get the only BioSample associated with a PhiX assembly
   - BioSample : "SAMN03379850"
   # Get that and some other assemblies
-  - Assembly : "GCA_002587985.1 OR 	GCA_002585215.1 OR GCA_002585255.1"
+  - Assembly : "GCA_002587985.1 OR 	GCA_002585215.1 OR GCA_002585255.1 OR GCA_002587405.1"
 
 # Columns of the database (ie. metadata fields to retrieve)
 TABLE_COLUMNS :

@@ -1,6 +1,6 @@
 // Generate nextstrain-format metadata from NCBImeta SQLite database
 process EXPORT_NEXTSTRAIN_METADATA {
-    publishDir(path: "${params.output_folder}/nextstrain", mode: 'copy')
+    publishDir(path: "${params.output_dir}/nextstrain", mode: 'copy')
 
     input:
         path db_file
@@ -20,7 +20,7 @@ process EXPORT_NEXTSTRAIN_METADATA {
 // Get proximity list of most related context sequences for a focal set
 process PROXIMITIES {
     container 'snads/augur:21.1.0'
-    publishDir(path: "${params.output_folder}/nextstrain", mode: 'copy')
+    publishDir(path: "${params.output_dir}/nextstrain", mode: 'copy')
 
     label "process_medium"
 
@@ -52,7 +52,7 @@ process PROXIMITIES {
 // Get priority ranking of most related context sequences for a focal set
 process PRIORITIES {
     container 'snads/augur:21.1.0'
-    publishDir(path: "${params.output_folder}/nextstrain", mode: 'copy')
+    publishDir(path: "${params.output_dir}/nextstrain", mode: 'copy')
 
     label "process_medium"
 
@@ -84,7 +84,7 @@ process PRIORITIES {
 // run the whole nextstrain workflow, including export to auspice for visualization
 process NEXTSTRAIN_AUGUR_VCF {
     container 'snads/augur:21.1.0'
-    publishDir(path: "${params.output_folder}/nextstrain", mode: 'copy')
+    publishDir(path: "${params.output_dir}/nextstrain", mode: 'copy')
 
     label "proces_medium"
 

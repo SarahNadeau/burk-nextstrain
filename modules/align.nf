@@ -1,5 +1,5 @@
 process ALIGN_ASSEMBLIES_PARSNP {
-    publishDir "${params.output_folder}/align"
+    publishDir "${params.output_dir}/align"
     container 'staphb/parsnp:1.5.6'
 
     label "process_medium"

@@ -38,11 +38,11 @@ jobs:
             --max_assemblies 3 \
             main.nf
       
-      - name: Run main workflow on test data used cached sequences
+      - name: Run main workflow on test data with cached sequences
         run: |
           nextflow run \
             -profile docker \
             --api_key ${{ env.ncbi_api_key }} \
             --ncbi_email ${{ env.ncbi_email }} \
-            --data_dir data 
+            --data_dir assets/test_data/assemblies \
             main.nf

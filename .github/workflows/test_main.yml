@@ -44,5 +44,5 @@ jobs:
             -profile docker \
             --api_key ${{ env.ncbi_api_key }} \
             --ncbi_email ${{ env.ncbi_email }} \
-            --data_dir assets/test_data/assemblies \
+            --local_assemblies_to_include assets/test_data/assemblies \
             main.nf

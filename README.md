@@ -2,8 +2,10 @@
 
 This project is to keep a Nextstrain build for B. pseudomallei automatically updated whenever new data is made available in NCBI's RefSeq database.
 
-The workflow expects that you have an API key for querying NCBI. To get a key, follow the instructions [here](https://support.nlm.nih.gov/knowledgebase/article/KA-05317/en-us).
-It also requires you to specify an email address to be associated with your queries to NCBI.
+Requirements:
+* Environment variable `NCBI_API_KEY`: API key for querying NCBI. To get a key, follow the instructions [here](https://support.nlm.nih.gov/knowledgebase/article/KA-05317/en-us).
+* Environment variable `NCBI_EMAIL`: email address to be associated with queries to NCBI.
+* Python3 with pandas installed.
 
 To download data and run a small example:
 ```
@@ -33,3 +35,14 @@ nextflow run main.nf \
 ## Developer notes
 
 To utilize the Github actions workflows defined in `.github/workflows`, you need to add two secrets to your repository, `NCBI_API_KEY` and `NCBI_EMAIL`.
+
+nextflow run main.nf \
+    -profile docker \
+    -with-report \
+    --api_key $NCBI_API_KEY \
+    --ncbi_email $NCBI_EMAIL \
+    --ncbimeta_config ncbimeta/b_pseudomallei_refseq.yaml \
+    --reference assets/GCF_000756125.1_ASM75612v1_genomic.fna \
+    --output_dir burk_results_5 \
+    --data_dir assets/burk_data/assemblies \
+    --max_assemblies 5

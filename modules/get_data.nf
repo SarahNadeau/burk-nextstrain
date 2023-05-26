@@ -72,20 +72,20 @@ process CHECK_FOR_NEW_ASSEMBLIES {
 }
 
 process DOWNLOAD_ASSEMBLIES {
-    publishDir (path: "${params.data_dir}", mode: 'copy')
+    publishDir (path: "${params.output_dir}", mode: 'copy')
     container "staphb/ncbi-datasets:14.7.0"
 
     input:
         path assembly_list
         val api_key
-        path data_dir
 
     output:
-        path "GC*", optional: true
-        val 'ready', emit: ready_signal
+        path "new_assemblies", emit: new_assembly_dir
 
     shell:
     """
+    mkdir new_assemblies
+
     # If the file contains new assemblies to download, download them
     if [[ -s !{assembly_list} ]]; then
         # Download assemblies
@@ -98,12 +98,13 @@ process DOWNLOAD_ASSEMBLIES {
         # Rename to assembly accession by removing everything after second-to-last underscore
         # Assumes filenames like GCA_002587985.1_ASM258798v1_genomic.fna > GCA_002587985.1
         for DIR in ncbi_dataset/data/*/; do
-            mv \$DIR/*.fna .
-            for FILE in ./*.fna; do
+            mv \$DIR/*.fna new_assemblies
+            for FILE in new_assemblies/*.fna; do
                 mv -i "\$FILE" "\${FILE%_*_*}"
             done
             rm -r \$DIR
         done
+
     # If no assemblies in file, don't download anything and warn user
     else 
         echo "No new assemblies found to download"

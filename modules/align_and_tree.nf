@@ -1,12 +1,12 @@
-process ALIGN_ASSEMBLIES_PARSNP {
+process PARSNP {
     publishDir "${params.output_dir}/align"
     container 'staphb/parsnp:1.5.6'
 
     label "process_medium"
 
     input:
-        val ready_signal
-        path assembly_dir
+        path new_assembly_dir
+        path data_dir
         path reference
 
     output:
@@ -21,7 +21,7 @@ process ALIGN_ASSEMBLIES_PARSNP {
         parsnp \
             -c \
             -r !{reference} \
-            --sequences !{assembly_dir} \
+            --sequences !{data_dir} !{new_assembly_dir} \
             --threads !{task.cpus} \
             --output-dir parsnp \
             --vcf
@@ -30,6 +30,4 @@ process ALIGN_ASSEMBLIES_PARSNP {
         # Extract SNP alignment from harvest file
         harvesttools -i parsnp.ggr -S snp_alignment.fasta
         """
-
-    
 }

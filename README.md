@@ -5,13 +5,12 @@ This project is to keep a Nextstrain build for B. pseudomallei automatically upd
 The workflow expects that you have an API key for querying NCBI. To get a key, follow the instructions [here](https://support.nlm.nih.gov/knowledgebase/article/KA-05317/en-us).
 It also requires you to specify an email address to be associated with your queries to NCBI.
 
-To run a small example:
+To download data and run a small example:
 ```
 nextflow run \
     -profile docker \
     --api_key $NCBI_API_KEY \
     --ncbi_email $NCBI_EMAIL \
-    --cached_assembly_dir assets/test_data/assemblies \
     main.nf
 ```
 

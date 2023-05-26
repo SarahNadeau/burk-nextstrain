@@ -26,7 +26,7 @@ assembly_table = pd.read_table(args.assembly_table)
 try:
     cached_assemblies = os.listdir(args.assembly_dir)
 except FileNotFoundError:
-    print("No existing assemblies found in '" + args.assembly_dir + "' directory.")
+    print("No locally stored assemblies found in '" + args.assembly_dir + "'.")
     cached_assemblies = []
 
 # Filter table to new assemblies only

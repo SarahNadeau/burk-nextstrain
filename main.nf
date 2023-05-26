@@ -5,7 +5,7 @@ params.api_key = ''
 params.ncbi_email = ''
 params.ncbimeta_config = 'ncbimeta/test.yaml'
 params.reference = 'assets/test_data/reference.fasta'
-params.data_dir = 'data'  // where to download assemblies to, can also include cached assemblies you want to include in analysis
+params.data_dir = 'None'  // locally stored assemblies you want to include in analysis
 params.output_dir = "output_${workflow.start}" // where to output intermediate output, auspic JSON to
 params.traits = 'region host' // metadata column names to reconstruct ancestral traits for
 params.max_assemblies = 'Inf' // maximum number of assemblies to download, regardless of how many match NCBI query
@@ -17,7 +17,7 @@ include {
     CHECK_FOR_NEW_ASSEMBLIES;
     DOWNLOAD_ASSEMBLIES } from './modules/get_data.nf'
 include {
-    ALIGN_ASSEMBLIES_PARSNP } from './modules/align.nf'
+    PARSNP } from './modules/align_and_tree.nf'
 include {
     EXPORT_NEXTSTRAIN_METADATA;
     NEXTSTRAIN_AUGUR_TRAITS } from './modules/nextstrain.nf'
@@ -43,11 +43,10 @@ workflow {
 
     DOWNLOAD_ASSEMBLIES(
         CHECK_FOR_NEW_ASSEMBLIES.out.assemblies_to_download,
-        params.api_key,
-        data_dir)
+        params.api_key)
 
-    ALIGN_ASSEMBLIES_PARSNP(
-        DOWNLOAD_ASSEMBLIES.out.ready_signal,
+    PARSNP(
+        DOWNLOAD_ASSEMBLIES.out.new_assembly_dir,
         data_dir,
         reference)
 
@@ -55,8 +54,8 @@ workflow {
 
     NEXTSTRAIN_AUGUR_TRAITS(
         EXPORT_NEXTSTRAIN_METADATA.out.metadata,
-        ALIGN_ASSEMBLIES_PARSNP.out.tree,
-        ALIGN_ASSEMBLIES_PARSNP.out.snp_alignment,
+        PARSNP.out.tree,
+        PARSNP.out.snp_alignment,
         params.traits)       
 
 }
